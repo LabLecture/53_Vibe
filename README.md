@@ -15,6 +15,7 @@ Vibe Coding 3일 과정의 실습 저장소. **보조 노트북**(원리를 직�
 │   └── 05_agent_sdk.ipynb       # 5교시 — Agent SDK 최소 예제
 │
 ├── crawler/                 # 관통 프로젝트 ① 수집  ← 1.9 에서 채운다
+├── store/                   # 관통 프로젝트 ② 저장  ← 8.2+ 에서 채운다
 ├── notifier/                # 관통 프로젝트 ④ 알림  ← 6.11 에서 채운다
 ├── tests/                   # 계약(contract) — 이 테스트가 정답을 고정한다
 ├── conftest.py              # tests/ 에서 프로젝트 루트를 import 가능하게
@@ -44,6 +45,7 @@ python -m pytest -q
 | Day 3 · 1.6 | `crawler/quotes.py` | `tests/test_quotes.py` |
 | Day 3 · 1.9 | `crawler/__init__.py` | `tests/test_crawler.py` |
 | Day 3 · 6.11 | `notifier/__init__.py` | `tests/test_notifier.py` |
+| Day 3 · 8.2+ | `store/__init__.py` | `tests/test_store.py` |
 
 한 파일씩 검증하려면:
 ```powershell
@@ -60,6 +62,7 @@ python -m pytest tests/test_notifier.py -q
 | `crawler/__init___solve.py` | 1.9 |
 | `crawler/quotes_solve.py` | 1.6 |
 | `notifier/__init___solve.py` | 6.11 |
+| `store/__init___solve.py` | 8.2+ |
 | `notify_solve.ts` | 6.5 (bun 웹훅 알림) |
 
 ## 시크릿
