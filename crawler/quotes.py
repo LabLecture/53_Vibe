@@ -1,7 +1,10 @@
 """Scrape quotes from quotes.toscrape.com.
 
 Day 3 · 1.6 [실습] 에서 채운다 — 1.4의 자유 실습 파일(``scrape_quotes.py``)을
-여기로 옮겨 정착시키는 자리다. 계약은 ``tests/test_quotes.py`` 가 고정한다.
+여기로 옮겨 정착시키는 자리다.
+
+계약(``tests/test_quotes.py``)은 **미리 주지 않는다** — 1.6 ①에서 에이전트에게
+먼저 만들게 하고(RED), 그 다음 통과시킨다(GREEN). Day 2 5교시의 리듬 그대로다.
 
 두 층으로 나눠 둔 이유: **원시 수집(scrape_quotes)과 정제(crawl)를 분리**해 두면
 정제 규칙이 바뀌어도 수집을 다시 안 만져도 된다.

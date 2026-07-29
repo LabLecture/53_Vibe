@@ -42,7 +42,7 @@ python -m pytest -q
 
 | 실습 | 채울 곳 | 계약 |
 |---|---|---|
-| Day 3 · 1.6 | `crawler/quotes.py` | `tests/test_quotes.py` |
+| Day 3 · 1.6 | `crawler/quotes.py` | **`tests/test_quotes.py` 를 직접 만든다**(①) |
 | ↳ | 1.4에서 자유 실습으로 만든 `scrape_quotes.py` 를 여기로 옮겨 정착시키고, 정제·매핑을 하는 `crawl` 을 얹는다 | |
 | Day 3 · 1.9 | `crawler/__init__.py` | `tests/test_crawler.py` |
 | Day 3 · 6.11 | `notifier/__init__.py` | `tests/test_notifier.py` |
@@ -78,9 +78,9 @@ python -m pytest tests/test_notifier.py -q
 
 ## 네트워크가 필요한 테스트
 
-`tests/test_quotes.py` 와 `test_crawler.py::test_fetch_returns_page_body` 는
-**실제 사이트에 요청한다**. 오프라인이면 이 둘은 실패한다 — 나머지는 로컬에
-가짜 서버를 띄워 검증하므로 네트워크 없이도 돈다.
+`test_crawler.py::test_fetch_returns_page_body` 는 **실제 사이트에 요청한다**
+(1.6 ①에서 직접 만드는 `tests/test_quotes.py` 도 그렇다). 오프라인이면 이들은
+실패한다 — 나머지는 로컬에 가짜 서버를 띄워 검증하므로 네트워크 없이도 돈다.
 
 `tests/test_notifier.py` 도 **로컬 가짜 웹훅 서버**를 쓴다. 테스트를 돌려도
 실제 Discord 채널로는 아무것도 나가지 않는다.
