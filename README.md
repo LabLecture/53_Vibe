@@ -43,6 +43,7 @@ python -m pytest -q
 | 실습 | 채울 곳 | 계약 |
 |---|---|---|
 | Day 3 · 1.6 | `crawler/quotes.py` | `tests/test_quotes.py` |
+| ↳ | 1.4에서 자유 실습으로 만든 `scrape_quotes.py` 를 여기로 옮겨 정착시키고, 정제·매핑을 하는 `crawl` 을 얹는다 | |
 | Day 3 · 1.9 | `crawler/__init__.py` | `tests/test_crawler.py` |
 | Day 3 · 6.11 | `notifier/__init__.py` | `tests/test_notifier.py` |
 | Day 3 · 8.2+ | `store/__init__.py` | `tests/test_store.py` |
