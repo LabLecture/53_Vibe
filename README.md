@@ -1,4 +1,4 @@
-# 53_Vibe — Vibe Coding 실습 저장소
+﻿# 53_Vibe — Vibe Coding 실습 저장소
 
 Vibe Coding 3일 과정의 실습 저장소. **보조 노트북**(원리를 직접 겪는 용도)과
 **관통 프로젝트 스캐폴딩**(교안 [실습]에서 채우는 뼈대)이 함께 들어 있다.
@@ -65,8 +65,6 @@ python -m pytest tests/test_notifier.py -q
 | `notifier/__init___solve.py` | 6.11 |
 | `store/__init___solve.py` | 8.2+ |
 | `notify_solve.ts` | 6.5 (bun 웹훅 알림) |
-| `day3/ml_pipeline_solve.py` | 3.10 (누수 없는 ML 파이프라인) |
-| `day3/ml_pipeline_test_solve.py` | 3.10 ① (누수 탐지 게이트) |
 
 ## 시크릿
 
