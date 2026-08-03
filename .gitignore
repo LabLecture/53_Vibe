@@ -7,3 +7,6 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+/day1/.agents/skills/langfuse
+/day1/.claude/skills/langfuse
+skills-lock.json
