@@ -9,12 +9,12 @@ Vibe Coding 3일 과정의 실습 저장소. **보조 노트북**(원리를 직�
 53_Vibe/
 ├── day2/                    # Day 2 보조 노트북
 ├── day3/                    # Day 3 보조 노트북
-│   ├── 01_crawler.ipynb         # 1교시 — 요청→파싱→정제→Item
+│   ├── 01_crawler.ipynb         # 1교시 — 요청→파싱→정제→Item (books.toscrape.com)
 │   ├── 02_injection_demo.ipynb  # 2교시 — 인젝션 재현→방어
 │   ├── 03_ml_pipeline.ipynb     # 3교시 — 전처리→학습→평가
 │   └── 05_agent_sdk.ipynb       # 5교시 — Agent SDK 최소 예제
 │
-├── crawler/                 # 관통 프로젝트 ① 수집  ← 1.9 에서 채운다
+├── crawler/                 # 관통 프로젝트 ① 수집  ← 1.6 · 1.10 에서 채운다
 ├── store/                   # 관통 프로젝트 ② 저장  ← 8.2+ 에서 채운다
 ├── notifier/                # 관통 프로젝트 ④ 알림  ← 6.11 에서 채운다
 ├── tests/                   # 계약(contract) — 이 테스트가 정답을 고정한다
@@ -42,9 +42,9 @@ python -m pytest -q
 
 | 실습 | 채울 곳 | 계약 |
 |---|---|---|
-| Day 3 · 1.6 | `crawler/quotes.py` | **`tests/test_quotes.py` 를 직접 만든다**(①) |
-| ↳ | 1.4에서 자유 실습으로 만든 `scrape_quotes.py` 를 여기로 옮겨 정착시키고, 정제·매핑을 하는 `crawl` 을 얹는다 | |
-| Day 3 · 1.9 | `crawler/__init__.py` | `tests/test_crawler.py` |
+| Day 3 · 1.6 | `crawler/books.py` | **`tests/test_books.py` 를 직접 만든다**(①) |
+| ↳ | 1.3~1.5에서 자유 실습으로 만든 `scrape_books.py` 를 여기로 옮겨 정착시키고, 정제·매핑을 하는 `crawl` 을 얹는다 | |
+| Day 3 · 1.10 | `crawler/__init__.py` | `tests/test_crawler.py` |
 | Day 3 · 6.11 | `notifier/__init__.py` | `tests/test_notifier.py` |
 | Day 3 · 8.2+ | `store/__init__.py` | `tests/test_store.py` |
 
@@ -60,8 +60,8 @@ python -m pytest tests/test_notifier.py -q
 
 | 정답본 | 대응 실습 |
 |---|---|
-| `crawler/__init___solve.py` | 1.9 |
-| `crawler/quotes_solve.py` | 1.6 |
+| `crawler/__init___solve.py` | 1.10 |
+| `crawler/books_solve.py` | 1.6 |
 | `notifier/__init___solve.py` | 6.11 |
 | `store/__init___solve.py` | 8.2+ |
 | `notify_solve.ts` | 6.5 (bun 웹훅 알림) |
@@ -79,7 +79,7 @@ python -m pytest tests/test_notifier.py -q
 ## 네트워크가 필요한 테스트
 
 `test_crawler.py::test_fetch_returns_page_body` 는 **실제 사이트에 요청한다**
-(1.6 ①에서 직접 만드는 `tests/test_quotes.py` 도 그렇다). 오프라인이면 이들은
+(1.6 ①에서 직접 만드는 `tests/test_books.py` 도 그렇다). 오프라인이면 이들은
 실패한다 — 나머지는 로컬에 가짜 서버를 띄워 검증하므로 네트워크 없이도 돈다.
 
 `tests/test_notifier.py` 도 **로컬 가짜 웹훅 서버**를 쓴다. 테스트를 돌려도
