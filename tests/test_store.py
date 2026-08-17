@@ -2,11 +2,11 @@ import pytest
 
 from store import connect, count_items, init_schema, save_items
 
-BOOKS = [
-    {"source": "books.toscrape", "title": "A Light in the Attic",
-     "url": "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html"},
-    {"source": "books.toscrape", "title": "Tipping the Velvet",
-     "url": "https://books.toscrape.com/catalogue/tipping-the-velvet_999/index.html"},
+PAPERS = [
+    {"source": "arxiv", "title": "Attention Is All You Need",
+     "url": "http://arxiv.org/abs/1706.03762v7"},
+    {"source": "arxiv", "title": "Denoising Diffusion Probabilistic Models",
+     "url": "http://arxiv.org/abs/2006.11239v2"},
 ]
 
 
@@ -20,22 +20,22 @@ def conn(tmp_path):
 
 
 def test_save_items_inserts_every_row(conn):
-    assert save_items(conn, BOOKS) == 2
+    assert save_items(conn, PAPERS) == 2
     assert count_items(conn) == 2
 
 
 def test_save_items_skips_duplicate_urls(conn):
-    save_items(conn, BOOKS)
+    save_items(conn, PAPERS)
 
     # 같은 항목을 다시 저장해도 늘지 않는다 — url UNIQUE 가 최종 방어선이다.
-    assert save_items(conn, BOOKS) == 0
+    assert save_items(conn, PAPERS) == 0
     assert count_items(conn) == 2
 
 
 def test_save_items_drops_rows_without_url_or_title(conn):
-    dirty = BOOKS + [
-        {"source": "books.toscrape", "title": "no url"},
-        {"source": "books.toscrape", "title": "", "url": "https://example.com/empty"},
+    dirty = PAPERS + [
+        {"source": "arxiv", "title": "no url"},
+        {"source": "arxiv", "title": "", "url": "http://arxiv.org/abs/0000.00000v1"},
     ]
     assert save_items(conn, dirty) == 2
 
@@ -51,7 +51,7 @@ def test_connect_falls_back_to_sqlite(tmp_path, monkeypatch):
 
     connection = connect()
     init_schema(connection)
-    assert save_items(connection, BOOKS) == 2
+    assert save_items(connection, PAPERS) == 2
     connection.close()
 
     assert (tmp_path / "vibe.db").exists()
