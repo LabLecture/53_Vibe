@@ -10,3 +10,4 @@ __pycache__/
 /day1/.agents/skills/langfuse
 /day1/.claude/skills/langfuse
 skills-lock.json
+legacy/report.log

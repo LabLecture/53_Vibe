@@ -9,3 +9,8 @@
 
 이 산출물은 교안의 📊 실측값과 같은 세션에서 나온 것이다(Sonnet, `docs/` 가 빈 상태에서 순서대로 실행).
 수강생 화면은 다를 수 있다 — **정답이 아니라 한 번 돌려 본 결과**로 다룬다.
+
+- `day2/legacy_solve/` — Day 2 · 4교시(Explore→Plan→Code→Commit) 정답본
+  - `EXPLORE.md` Explore 단계 산출물(흐름·위험지점·영향 범위)
+  - `test_report_characterization.py` 특성화 테스트 15개 (원본 코드에서 전부 GREEN)
+  - `report_fixed.py` 최소 범위 수정본 (캐시 키만 내용 기반으로 교체)
