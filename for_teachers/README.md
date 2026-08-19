@@ -15,6 +15,7 @@
     항목 수만 같으면 지난 결과를 그대로 돌려주는 버그가 살아 있다
   - `EXPLORE.md` Explore 단계 산출물(흐름·위험지점·영향 범위)
   - `test_report_characterization.py` 특성화 테스트 15개 (원본 코드에서 전부 GREEN)
+  - `report_comment.py` 원본에 줄별 해설을 단 강사용 사본 — **`legacy/` 에 두면 4.5 Explore 실습의 답이 노출되므로 여기 둔다**
   - `report_fixed.py` 최소 범위 수정본. `report_init.py` 와 **3줄만** 다르다 —
     `diff report_init.py report_fixed.py` 로 4교시의 결론(−3/+3)을 그대로 보여줄 수 있다
 
