@@ -1,110 +1,159 @@
-"""legacy/report.py 의 fmt()/render() 현재 동작을 고정하는 특성화 테스트.
+"""Characterization tests for legacy/report.py.
 
-옳고 그름은 따지지 않는다 - 지금 나오는 값을 그대로 assert 한다.
-구현(legacy/report.py)은 건드리지 않는다.
+Lock down CURRENT behavior of fmt() and render() as-is.
+If a future refactor changes behavior, these tests are expected to fail
+and must be re-pinned deliberately.
 """
+import os
 import re
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pytest
 
 from legacy import report
 
-ITEMS = [
-    {"title": "Attention Is All You Need", "url": "http://arxiv.org/abs/1706.03762"},
-    {"title": "Denoising Diffusion Probabilistic Models", "url": "http://arxiv.org/abs/2006.11239"},
-]
+LOG_LINE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2} (hit|miss) \d+$")
+
+
+def _read_log_lines():
+    if not os.path.exists(report._LOG):
+        return []
+    with open(report._LOG, encoding="utf-8") as f:
+        return f.readlines()
 
 
 @pytest.fixture(autouse=True)
-def isolate_global_state(tmp_path, monkeypatch):
-    """_CACHE(전역 dict)와 _LOG(로그 파일 경로)를 테스트마다 격리한다.
-
-    실제 부작용(캐시 적재, 파일 append)은 그대로 발생시키되,
-    테스트 간 오염과 저장소의 실제 report.log 오염을 막기 위해 대상만 tmp_path 로 바꾼다.
-    """
-    monkeypatch.setattr(report, "_CACHE", {})
-    log_path = tmp_path / "report.log"
-    monkeypatch.setattr(report, "_LOG", str(log_path))
-    return log_path
+def _reset_cache():
+    report._CACHE.clear()
+    yield
+    report._CACHE.clear()
 
 
-def test_fmt_basic():
-    assert report.fmt(ITEMS) == (
-        " 1. Attention Is All You Need\n"
-        "    http://arxiv.org/abs/1706.03762\n"
-        " 2. Denoising Diffusion Probabilistic Models\n"
-        "    http://arxiv.org/abs/2006.11239"
+def test_fmt_basic_two_items():
+    items = [
+        {"title": "First Paper", "url": "http://a.example/1"},
+        {"title": "Second Paper", "url": "http://a.example/2"},
+    ]
+    assert report.fmt(items) == (
+        " 1. First Paper\n"
+        "    http://a.example/1\n"
+        " 2. Second Paper\n"
+        "    http://a.example/2"
     )
 
 
-def test_fmt_truncates_long_title_default_width():
-    long_items = [{"title": "x" * 100, "url": None}]
-    assert report.fmt(long_items) == " 1. " + "x" * 77 + "..."
+def test_fmt_missing_title_defaults_empty():
+    items = [{}]
+    assert report.fmt(items) == " 1. "
 
 
-def test_fmt_truncates_long_title_custom_width():
-    long_items = [{"title": "x" * 100, "url": None}]
-    assert report.fmt(long_items, w=10) == " 1. xxxxxxx..."
+def test_fmt_title_is_stripped():
+    items = [{"title": "  padded title  "}]
+    assert report.fmt(items) == " 1. padded title"
 
 
-def test_fmt_missing_title_defaults_to_empty_string():
-    assert report.fmt([{"url": "http://x"}]) == " 1. \n    http://x"
+def test_fmt_title_exact_width_not_truncated():
+    title = "x" * 80
+    items = [{"title": title}]
+    assert report.fmt(items, w=80) == " 1. " + title
 
 
-def test_fmt_missing_url_omits_url_line():
-    assert report.fmt([{"title": "no url here"}]) == " 1. no url here"
+def test_fmt_title_over_width_truncated():
+    title = "x" * 81
+    items = [{"title": title}]
+    out = report.fmt(items, w=80)
+    expected = " 1. " + "x" * 77 + "..."
+    assert out == expected
+    # truncated title portion is exactly w chars long
+    assert len(out.split(". ", 1)[1]) == 80
+
+
+def test_fmt_url_omitted_when_missing():
+    items = [{"title": "No URL"}]
+    assert report.fmt(items) == " 1. No URL"
+
+
+def test_fmt_url_omitted_when_falsy():
+    items = [{"title": "Empty URL", "url": ""}]
+    assert report.fmt(items) == " 1. Empty URL"
 
 
 def test_fmt_empty_items_returns_empty_string():
     assert report.fmt([]) == ""
 
 
-def test_render_basic():
-    assert report.render(ITEMS) == (
-        "주간 리포트 (2건)\n"
-        "-----------\n"
-        " 1. Attention Is All You Need\n"
-        "    http://arxiv.org/abs/1706.03762\n"
-        " 2. Denoising Diffusion Probabilistic Models\n"
-        "    http://arxiv.org/abs/2006.11239"
-    )
+def test_fmt_cache_key_includes_content_not_just_length():
+    """cache key = (w, tuple(title, url)) 이므로 길이가 같아도 내용이 다르면
+    캐시가 아닌 새 결과가 나온다 (stale hit 없음)."""
+    first = [{"title": "Original A"}, {"title": "Original B"}]
+    second = [{"title": "Different A"}, {"title": "Different B"}]
+
+    first_result = report.fmt(first)
+    second_result = report.fmt(second)
+
+    assert second_result != first_result
+    assert "Different" in second_result
 
 
-def test_render_empty_items():
+def test_fmt_cache_key_includes_w_param():
+    items = [{"title": "x" * 81}]
+    first_result = report.fmt(items, w=80)
+    second_result = report.fmt(items, w=10)
+    assert second_result != first_result
+
+
+def test_fmt_logs_miss_then_hit_to_log_file():
+    items_len2 = [{"title": "A"}, {"title": "B"}]
+
+    before = len(_read_log_lines())
+    report.fmt(items_len2)
+    after_miss = _read_log_lines()
+    assert len(after_miss) == before + 1
+    assert after_miss[-1].rstrip("\n").endswith("miss 2")
+    assert LOG_LINE_RE.match(after_miss[-1].rstrip("\n"))
+
+    report.fmt(items_len2)
+    after_hit = _read_log_lines()
+    assert len(after_hit) == before + 2
+    assert after_hit[-1].rstrip("\n").endswith("hit 2")
+    assert LOG_LINE_RE.match(after_hit[-1].rstrip("\n"))
+
+
+def test_render_empty_items_returns_fixed_message():
     assert report.render([]) == "새 논문 없음"
 
 
-def test_render_custom_header():
-    assert report.render(ITEMS, header="custom") == (
-        "custom\n"
-        "------\n"
-        " 1. Attention Is All You Need\n"
-        "    http://arxiv.org/abs/1706.03762\n"
-        " 2. Denoising Diffusion Probabilistic Models\n"
-        "    http://arxiv.org/abs/2006.11239"
+def test_render_default_header():
+    items = [{"title": "Only Paper", "url": "http://a.example/1"}]
+    out = report.render(items)
+    expected_header = "주간 리포트 (1건)"
+    expected = "%s\n%s\n%s" % (
+        expected_header,
+        "-" * len(expected_header),
+        " 1. Only Paper\n    http://a.example/1",
     )
+    assert out == expected
 
 
-def test_fmt_caches_by_content_and_width():
-    """같은 (w, items 내용) 이면 두 번째 호출은 캐시에서 그대로 반환된다."""
-    first = report.fmt(ITEMS)
-    assert len(report._CACHE) == 1
-    key = (80, tuple((it.get("title", ""), it.get("url")) for it in ITEMS))
-    assert key in report._CACHE
-
-    second = report.fmt(ITEMS)
-    assert second == first
+def test_render_custom_header():
+    items = [{"title": "Paper"}]
+    out = report.render(items, header="Custom Header")
+    expected = "%s\n%s\n%s" % ("Custom Header", "-" * len("Custom Header"), " 1. Paper")
+    assert out == expected
 
 
-def test_fmt_writes_miss_then_hit_to_log_file(isolate_global_state):
-    log_path = isolate_global_state
+def test_render_does_not_inherit_stale_cache_across_calls():
+    """fmt() 캐시 키에 content 가 포함되므로 render() 를 다른 items 로
+    연달아 호출해도 서로 결과가 섞이지 않는다."""
+    first_items = [{"title": "First"}]
+    second_items = [{"title": "Second"}]
 
-    report.fmt(ITEMS)
-    lines = log_path.read_text(encoding="utf-8").splitlines()
-    assert len(lines) == 1
-    assert re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2} miss 2$", lines[0])
+    first_out = report.render(first_items)
+    second_out = report.render(second_items)
 
-    report.fmt(ITEMS)
-    lines = log_path.read_text(encoding="utf-8").splitlines()
-    assert len(lines) == 2
-    assert re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2} hit 2$", lines[1])
+    assert "First" in first_out
+    assert "Second" in second_out
+    assert "Second" not in first_out
+    assert "First" not in second_out

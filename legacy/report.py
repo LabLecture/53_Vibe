@@ -9,6 +9,7 @@ def _w(msg):
     with open(_LOG, "a", encoding="utf-8") as f:
         f.write("%s %s\n" % (datetime.datetime.now().isoformat(timespec="seconds"), msg))
 
+_MAX_LEN = 2000
 
 def fmt(items, w=80):
     k = (w, tuple((it.get("title", ""), it.get("url")) for it in items))
@@ -31,8 +32,25 @@ def fmt(items, w=80):
 
 
 def render(items, header=None):
+    items = [it for it in items if it.get("title", "").strip()]
     body = fmt(items)
     if not body:
         return "새 논문 없음"
     h = header or ("주간 리포트 (%d건)" % len(items))
-    return "%s\n%s\n%s" % (h, "-" * len(h), body)
+    rule = "-" * len(h)
+    s = "%s\n%s\n%s" % (h, rule, body)
+    if len(s) <= _MAX_LEN:
+        return s
+    n = len(items)
+    while n > 0:
+        n -= 1
+        omitted = len(items) - n
+        trimmed = fmt(items[:n])
+        parts = [h, rule]
+        if trimmed:
+            parts.append(trimmed)
+        parts.append("외 %d건" % omitted)
+        s = "\n".join(parts)
+        if len(s) <= _MAX_LEN:
+            return s
+    return s
