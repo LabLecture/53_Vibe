@@ -11,9 +11,9 @@ def _w(msg):
 
 
 def fmt(items, w=80):
-    k = len(items)
+    k = (w, tuple((it.get("title", ""), it.get("url")) for it in items))
     if k in _CACHE:
-        _w("hit %s" % k)
+        _w("hit %s" % len(items))
         return _CACHE[k]
     out = []
     for i, it in enumerate(items, 1):
@@ -26,7 +26,7 @@ def fmt(items, w=80):
             out.append("    %s" % u)
     s = "\n".join(out)
     _CACHE[k] = s
-    _w("miss %s" % k)
+    _w("miss %s" % len(items))
     return s
 
 
