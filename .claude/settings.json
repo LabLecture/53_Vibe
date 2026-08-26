@@ -9,7 +9,12 @@
             "command": "python .claude/hooks/commit_gate.py"
           }
         ]
-      }
+      },
+      { "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "python .claude/hooks/danger_gate.py" }] }
     ]
+  },
+  "permissions": {
+    "deny": ["Read(./.env)", "Read(./.env.*)", "Bash(cat .env)", "Bash(type .env)"]
   }
 }
